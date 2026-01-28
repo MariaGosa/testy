@@ -1,0 +1,34 @@
+package com.example.testy.service;
+
+import com.example.testy.model.Task;
+import com.example.testy.repository.TaskRepository;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class TaskServiceTest {
+
+    @Mock
+    private TaskRepository repository;
+
+    @InjectMocks
+    private TaskService service;
+
+    @Test
+    void shouldReturnTasksFromRepository() {
+        when(repository.findAll()).thenReturn(List.of(new Task("Service test", false)));
+
+        List<Task> tasks = service.getAllTasks();
+
+        assertThat(tasks).hasSize(1);
+        assertThat(tasks.get(0).getTitle()).isEqualTo("Service test");
+    }
+}

@@ -1,0 +1,28 @@
+package com.example.testy.repository;
+
+import com.example.testy.model.Task;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DataJpaTest
+class TaskRepositoryTest {
+
+    @Autowired
+    private TaskRepository repository;
+
+    @Test
+    void shouldSaveAndLoadTask() {
+        Task task = new Task("Repo test", false);
+        repository.save(task);
+
+        List<Task> tasks = repository.findAll();
+
+        assertThat(tasks).isNotEmpty();
+        assertThat(tasks.get(0).getTitle()).isEqualTo("Repo test");
+    }
+}
