@@ -311,7 +311,93 @@ Kliknij Run przy klasie testowej lub Run All Tests
 
 Raporty szczegółowe w target/surefire-reports
 
-**8. Podsumowanie**
+**Znane problemy i ich rozwiązania**
+**8.1 Whitelabel Error Page 404**
+
+Objaw:
+Po uruchomieniu aplikacji i wejściu na http://localhost:8080/tasks pojawia się strona Whitelabel Error Page z błędem 404.
+
+Przyczyny:
+
+Endpoint nie istnieje lub ścieżka jest błędna.
+
+Kontroler nie został poprawnie wykryty przez Spring Boot.
+
+Rozwiązania:
+
+Sprawdź poprawność ścieżek w kontrolerze:
+
+@RestController
+@RequestMapping("/tasks")
+public class TaskController { ... }
+
+
+Upewnij się, że klasa kontrolera znajduje się w pakiecie skanowanym przez Spring Boot (pod pakietem głównym aplikacji).
+
+Włącz logowanie dla Spring Boot (logging.level.org.springframework.web=DEBUG) aby sprawdzić, które endpointy zostały zarejestrowane.
+
+**8.2 Problemy z H2 Database**
+
+Objawy:
+
+Nie można połączyć się z konsolą H2 (/h2-console).
+
+Dane nie zapisują się po restarcie aplikacji.
+
+Rozwiązania:
+
+Upewnij się, że konsola H2 jest włączona w application.properties:
+
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+
+
+Sprawdź JDBC URL w konsoli:
+
+jdbc:h2:mem:testdb
+
+
+Dane w in-memory H2 są tracone po wyłączeniu aplikacji – jeśli chcesz dane trwałe, użyj plikowej bazy H2:
+
+spring.datasource.url=jdbc:h2:file:./data/testdb
+
+**8.3 Błędy w testach MockMvc**
+
+Objawy:
+
+Testy kontrolera kończą się błędem 404 Not Found lub java.lang.AssertionError.
+
+Rozwiązania:
+
+Upewnij się, że serwis jest poprawnie mockowany:
+
+@MockBean
+private TaskService taskService;
+
+
+Sprawdź, czy testy wysyłają poprawny JSON w POST:
+
+mockMvc.perform(post("/tasks")
+    .contentType(MediaType.APPLICATION_JSON)
+    .content(objectMapper.writeValueAsString(task)))
+
+
+Możesz włączyć logowanie żądań w MockMvc:
+
+mockMvc.perform(get("/tasks")).andDo(print());
+
+**8.4 Ogólne narzędzia diagnostyczne w Spring Boot**
+
+Actuator – dodaje endpointy /actuator/health i /actuator/beans do monitorowania stanu aplikacji.
+
+Spring Boot DevTools – automatyczny restart aplikacji i hot reload przy zmianach w kodzie.
+
+Logowanie – konfiguracja poziomów logowania w application.properties:
+
+logging.level.org.springframework=DEBUG
+logging.level.com.example.testy=TRACE
+
+**9. Podsumowanie**
 
 Warstwa modelu: Task – encja JPA
 
